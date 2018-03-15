@@ -1,1 +1,1 @@
-🐺 Onthology-based, Deep &amp; Interpretable Networks
+# 🐺 Onthology-based Deep Interpretable Networks 🐺
