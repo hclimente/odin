@@ -1,5 +1,5 @@
-from keras.utils import to_categorical
-from sklearn.utils import shuffle
+from keras import utils
+import sklearn
 import numpy as np
 import pandas as pd
 
@@ -17,7 +17,6 @@ def save_pickle(obj, filepath):
         for idx in range(0, n_bytes, max_bytes):
             f_out.write(bytes_out[idx:idx+max_bytes])
 
-
 def load_pickle(filepath):
     """
     This is a defensive way to write pickle.load, allowing for very large files on all platforms
@@ -33,7 +32,7 @@ def load_pickle(filepath):
 
     return obj
 
-def read_x_y(filepath, categorical = False):
+def read_x_y(filepath, categorical = False, shuffle = True):
 
 	gwas = np.load(filepath)
 
@@ -41,15 +40,29 @@ def read_x_y(filepath, categorical = False):
 	y = gwas[:,0] - 1
 
 	if categorical:
-		y = to_categorical(y)
+		y = utils.to_categorical(y)
 
-	x, y = shuffle(x,y)
+	if shuffle:
+		x,y = sklearn.utils.shuffle(x,y)
 
-	return(x,y)
+	return x,y
 
-def read_map(filepath):
+def read_map(map_file):
 
-	snps = pd.read_csv(filepath, sep = '\t', header = None)
+	snps = pd.read_csv(map_file, sep = '\t', header = None)
 	snps.columns = ['chr','snp','cm','pos']
 
-	return(snps)
+	return snps
+
+def read_ped(ped_file, map_file):
+
+	x = np.array([])
+	y = np.array([])
+
+	# numpy read
+	# numpy convert to int8
+
+	snps = pd.read_csv(map_file, sep = '\t', header = None)
+	snps.columns = ['chr','snp','cm','pos']
+
+	return x,y,snps

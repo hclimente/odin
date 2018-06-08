@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+
+from odin.io import genotype_generator, io
+from odin.models.model import Model
+
+import argparse
+import pickle
+from sklearn.model_selection import train_test_split
+
+parser = argparse.ArgumentParser(prog = "odin",
+				description = "Ontology-based, Interpretable & Deep Neural networks")
+
+parser.add_argument('-i', '--input', dest='input', action='store', type=str,
+					help='Input, as a pickled numpy array', required = True)
+parser.add_argument('-o', '--output', dest='out', type=str,
+					help='Output directory.', default='.')
+parser.add_argument('-s', '--snps', dest='map', action='store', type=str,
+					help='MAP file.')
+subparsers = parser.add_subparsers(help='sub-command help')
+
+################################################
+###   TRAIN                                 ####
+################################################
+
+def train(x, y, snps, params):
+
+	x_train,x_test,y_train,y_test = train_test_split(x, y, test_size = 0.1)
+
+	model = Model(params)
+	generator = genotype_generator.GenotypeGenerator(x_train, y_train, snps['chr']) if params.augment else None
+	model.train(x_train, x_test, y_train, y_test, generator)
+	model.save(params.out)
+
+parser_train = subparsers.add_parser('train', help='Classifier training options')
+parser_train.add_argument('-a', '--architecture', dest='architecture', action='store', type=str,
+						  help='Network architecture.',
+						  choices=['logreg', 'diet','dnp'])
+parser_train.add_argument('-G', '--expand-genotypes', dest='augment', action='store_true',
+						  help='Data augmentation: create new genotypes.', default=False)
+parser_train.set_defaults(func=train)
+
+################################################
+###   PREDICT                               ####
+################################################
+
+def predict(x, y, snps, params):
+
+	model = pickle.load(open(params.model, "rb"))
+	model.predict(x, y)
+
+parser_predict = subparsers.add_parser('predict', help='Phenotype prediction options')
+parser_predict.add_argument('-m', '--model', dest='model', action='store', type=str,
+							help='Model file, as outputed by train subcommand.')
+parser_predict.set_defaults(func=predict)
+
+################################################
+###   MAIN                                  ####
+################################################
+params = parser.parse_args()
+
+if "func" not in params:
+	print("No sub-command selected.")
+	parser.print_help()
+	exit()
+
+x,y = io.read_x_y(params.input, categorical = True)
+snps = io.read_map(params.map)
+
+params.func(x, y, snps, params)

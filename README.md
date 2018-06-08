@@ -1,1 +1,1 @@
-🐺 Onthology-based, Deep &amp; Interpretable Networks
+🐺 Ontology-based, Deep &amp; Interpretable Neural Networks
