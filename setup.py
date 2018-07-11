@@ -24,7 +24,7 @@ setup(
 	install_requires = [
 		'keras >= 2.1.4',
 		'numpy >= 1.13.1',
-		'pandas >= 0.23.0',
+		'pandas >= 0.22.0',
 		'scikit-learn >= 0.19.1',
 		'tensorflow >= 1.1.0'],
 	scripts=['bin/odin']

@@ -30,9 +30,9 @@ class Model:
 						   batch_size = self.__batch_size,
 						   validation_data = (x_test,y_test))
 
-	def predict(self, x, y):
+	def fit(self, x, y):
 
-		self.model.predict(x, y)
+		self.model.fit(x)
 
 	def save(self, outdir):
 
