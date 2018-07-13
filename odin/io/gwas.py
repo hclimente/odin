@@ -36,7 +36,7 @@ class GWAS(Dataset):
 		elif ext == '.ped' or ext == '.map':
 			x, y, snps = self._read_ped(name)
 		else:
-			raise IOError
+			raise IOError('Unrecognized file extension {}'.format(ext))
 
 		x = torch.from_numpy(x)
 		x = x.type(torch.FloatTensor)

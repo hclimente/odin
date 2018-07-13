@@ -12,7 +12,7 @@ class Model:
 
 		self._arch = self._archs[arch]()
 
-	def fit(self, dataset, epochs = 10, steps_per_epoch = 20, batch_size = 100):
+	def fit(self, dataset, epochs = 10, batch_size = 100):
 
 		loader = DataLoader(dataset, shuffle = True, batch_size = batch_size)
 

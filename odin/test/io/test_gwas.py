@@ -92,14 +92,14 @@ def test__getitem__():
 def test_save():
 
     csv = GWAS(dataPath + 'gt.csv')
-    io.save_pickle(csv, 'gwas.pklz')
+    io.save_pickle(csv, 'gwas.pkl')
 
-    assert os.stat('gwas.pklz').st_size > 0
+    assert os.stat('gwas.pkl').st_size > 0
 
-    reloaded = io.load_pickle('gwas.pklz')
+    reloaded = io.load_pickle('gwas.pkl')
 
     assert np.all(csv.__getitem__(2)[1] == reloaded.__getitem__(2)[1])
     assert np.all(csv.__getitem__(4)[1] == reloaded.__getitem__(4)[1])
     assert np.all(csv.__getitem__(6)[1] == reloaded.__getitem__(6)[1])
 
-    os.remove('gwas.pklz')
+    os.remove('gwas.pkl')

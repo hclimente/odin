@@ -1,42 +1,53 @@
 #!/usr/bin/env python
 
-from odin.io import gwas_generator, io
+from odin.io import gwas, io
 from odin.arch.model import Model
 
 import argparse
-import pickle
-from sklearn.model_selection import train_test_split
+import logging
+import os
 
 parser = argparse.ArgumentParser(prog = "odin",
 				description = "Ontology-based, Interpretable & Deep Neural networks")
 
-parser.add_argument('-i', '--input', dest='input', action='store', type=str,
-					help='Input, as a pickled numpy array', required = True)
-parser.add_argument('-o', '--output', dest='out', type=str,
-					help='Output directory.', default='.')
-parser.add_argument('-s', '--snps', dest='map', action='store', type=str,
-					help='MAP file.')
+io_parser = argparse.ArgumentParser(add_help=False)
+io_parser.add_argument('-i', '--input', dest='input', action='store', type=str,
+				 	   help='Input, a table (tsv, csv), ped file or pickled GWAS.', required = True)
+io_parser.add_argument('-o', '--output', dest='out', type=str,
+					   help='Output directory.', default='.')
+io_parser.add_argument('-G', '--expand-genotypes', dest='augment', action='store_true',
+					   help='Data augmentation: create new genotypes.', default=False)
 subparsers = parser.add_subparsers(help='sub-command help')
+
+################################################
+###   RECODE                                ####
+################################################
+
+def recode(gwas, params):
+
+	name,ext = os.path.splitext(params.input)
+	logging.info('Recoding file {} as {}/{}.pkl.'.format(params.input, params.out, name))
+	io.save_pickle(gwas, '{}/{}.pkl'.format(params.out, name) )
+
+parser_recode = subparsers.add_parser('recode', help='Read a dataset and save it as pickled GWAS.', parents=[io_parser])
+parser_recode.set_defaults(func=recode)
 
 ################################################
 ###   TRAIN                                 ####
 ################################################
 
-def train(x, y, snps, params):
+def train(gwas, params):
 
-	x_train,x_test,y_train,y_test = train_test_split(x, y, test_size = 0.1)
+	logging.info('Training a {} neural-network.'.format(params.arch))
+	model = Model(params.arch)
+	model.fit(gwas)
+	logging.info('Saving model into {}/{}.pkl.'.format(params.out, params.arch))
+	io.save_pickle(model, '{}/{}.pkl'.format(params.out, params.arch) )
 
-	model = Model(params)
-	generator = gwas_generator.GWASGenerator(x_train, y_train, snps['chr']) if params.augment else None
-	model.fit(x_train, x_test, y_train, y_test, generator)
-	model.save(params.out)
-
-parser_train = subparsers.add_parser('train', help='Classifier training options')
-parser_train.add_argument('-a', '--architecture', dest='architecture', action='store', type=str,
-						  help='Network architecture.',
+parser_train = subparsers.add_parser('train', help='Classifier training options', parents=[io_parser])
+parser_train.add_argument('-a', '--arch', dest='arch', action='store', type=str,
+						  help='Network architecture.', required = True,
 						  choices=['logreg', 'diet','dnp'])
-parser_train.add_argument('-G', '--expand-genotypes', dest='augment', action='store_true',
-						  help='Data augmentation: create new genotypes.', default=False)
 parser_train.set_defaults(func=train)
 
 ################################################
@@ -45,10 +56,14 @@ parser_train.set_defaults(func=train)
 
 def predict(x, y, snps, params):
 
-	model = pickle.load(open(params.model, "rb"))
-	model.predict(x)
+	logging.info('Loading model from {}.'.format(params.model))
+	model = io.load_pickle(params.model)
+	logging.info('Predicting outcomes on GWAS experiment')
+	y_pred = model.predict(x)
+	logging.info('Saving predictions into {}/{}.pkl.'.format(params.out, params.arch))
+	io.save_pickle(y_pred, '{}/{}.pkl'.format(params.out, params.arch) )
 
-parser_predict = subparsers.add_parser('predict', help='Phenotype prediction options')
+parser_predict = subparsers.add_parser('predict', help='Phenotype prediction options', parents=[io_parser])
 parser_predict.add_argument('-m', '--model', dest='model', action='store', type=str,
 							help='Model file, as outputed by train subcommand.')
 parser_predict.set_defaults(func=predict)
@@ -58,12 +73,28 @@ parser_predict.set_defaults(func=predict)
 ################################################
 params = parser.parse_args()
 
+logging.basicConfig(filename='.odin.log', level=logging.DEBUG,
+					format 	 = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+
+formatter = logging.Formatter('%(asctime)s: %(levelname)-8s %(message)s',
+							  datefmt = '%X',)
+console = logging.StreamHandler()
+console.setFormatter(formatter)
+console.setLevel(logging.INFO)
+logging.getLogger().addHandler(console)
+
 if "func" not in params:
 	print("No sub-command selected.")
 	parser.print_help()
 	exit()
 
-x,y = io.read_x_y(params.input, categorical = True)
-snps = io.read_map(params.map)
+logging.info("ODIN " + params.func.__name__)
+logging.info('Reading GWAS experiment from {}.'.format(params.input))
+if params.input[-4:] == '.pkl':
+	gwas = io.load_pickle(params.input)
+else:
+	gwas = gwas_generator.GWASGenerator(params.input) if params.augment else gwas.GWAS(params.input)
 
-params.func(x, y, snps, params)
+params.func(gwas, params)
+
+logging.info("All operations completed.")

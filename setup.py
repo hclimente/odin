@@ -23,7 +23,6 @@ setup(
 		'Programming Language :: Python :: 3 :: Only'],
 	install_requires = [
 		'numpy >= 1.13.1',
-		'pandas >= 0.22.0',
-		'scikit-learn >= 0.19.1'],
+		'pandas >= 0.22.0'],
 	scripts=['bin/odin']
 )
