@@ -22,10 +22,8 @@ setup(
 		'Operating System :: Microsoft :: Windows',
 		'Programming Language :: Python :: 3 :: Only'],
 	install_requires = [
-		'keras >= 2.1.4',
 		'numpy >= 1.13.1',
 		'pandas >= 0.22.0',
-		'scikit-learn >= 0.19.1',
-		'tensorflow >= 1.1.0'],
+		'scikit-learn >= 0.19.1'],
 	scripts=['bin/odin']
 )

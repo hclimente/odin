@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from odin.io import genotype_generator, io
-from odin.models.model import Model
+from odin.io import gwas_generator, io
+from odin.arch.model import Model
 
 import argparse
 import pickle
@@ -27,7 +27,7 @@ def train(x, y, snps, params):
 	x_train,x_test,y_train,y_test = train_test_split(x, y, test_size = 0.1)
 
 	model = Model(params)
-	generator = genotype_generator.GenotypeGenerator(x_train, y_train, snps['chr']) if params.augment else None
+	generator = gwas_generator.GWASGenerator(x_train, y_train, snps['chr']) if params.augment else None
 	model.fit(x_train, x_test, y_train, y_test, generator)
 	model.save(params.out)
 

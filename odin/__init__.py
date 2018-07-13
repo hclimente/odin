@@ -1,5 +1,4 @@
-from . import architectures
+from . import arch
 from . import io
-from . import models
 
-__all__ = ['architectures', 'io', 'models']
+__all__ = ['arch', 'io']
