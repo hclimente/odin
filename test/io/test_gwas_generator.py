@@ -16,9 +16,9 @@ def test_init():
 
     assert issubclass(GWASGenerator, Dataset)
 
-    assert np.all(csv.x == tsv.x)
-    assert np.all(csv.y == tsv.y)
-    assert np.all(csv.snps == tsv.snps)
+    assert (csv.x == tsv.x).all()
+    assert (csv.y == tsv.y).all()
+    assert (csv.snps == tsv.snps).all()
     assert tsv.__len__() == 32
 
 def test_read_file():
@@ -39,14 +39,14 @@ def test_read_file():
     assert torch.sum(x_csv == 2) == 10
 
     # assert snps_csv
-    assert np.all(snps_csv == np.array(['rs1','rs2','rs3','rs4','rs5']))
+    assert (snps_csv == np.array(['rs1','rs2','rs3','rs4','rs5'])).all()
 
     # tsv
     x_tsv, y_tsv, snps_tsv = csv._read_file(dataPath + 'gt.tsv')
 
-    assert np.all(x_tsv == x_csv)
-    assert np.all(y_tsv == y_csv)
-    assert np.all(snps_tsv == snps_csv)
+    assert (x_tsv == x_csv).all()
+    assert (y_tsv == y_csv).all()
+    assert (snps_tsv == snps_csv).all()
 
     with pytest.raises(IOError):
         csv._read_file(dataPath + 'gt.kkk')
