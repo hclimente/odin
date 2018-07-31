@@ -51,6 +51,23 @@ def test_read_file():
     with pytest.raises(IOError):
         csv._read_file(dataPath + 'gt.kkk')
 
+def test__len__():
+
+    csv = GWASGenerator(dataPath + 'gt.csv', [1,1,1,2,2,2])
+
+    assert csv.__len__()
+
 def test__getitem__():
 
-    pass
+    csv = GWASGenerator(dataPath + 'gt.csv', [1,1,1,2,2,2])
+
+    control = torch.tensor([0])
+    case = torch.tensor([1])
+
+    assert csv.__getitem__(0)[1] == control
+    assert csv.__getitem__(16)[1] == control
+    assert csv.__getitem__(17)[1] == case
+    assert csv.__getitem__(32)[1] == case
+    
+    with pytest.raises(KeyError):
+        csv.__getitem__(33)
