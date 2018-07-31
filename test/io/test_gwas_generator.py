@@ -29,14 +29,14 @@ def test_read_file():
     x_csv, y_csv, snps_csv = csv._read_file(dataPath + 'gt.csv')
 
     # assert y_csv
-    assert torch.sum(y_csv == 1) == 4
-    assert torch.sum(y_csv == 0) == 4
+    assert (y_csv == 1).sum() == 4
+    assert (y_csv == 0).sum() == 4
 
     # assert x_csv
     assert x_csv.shape == (8, 5)
-    assert torch.sum(x_csv == 0) == 15
-    assert torch.sum(x_csv == 1) == 15
-    assert torch.sum(x_csv == 2) == 10
+    assert (x_csv == 0).sum() == 15
+    assert (x_csv == 1).sum() == 15
+    assert (x_csv == 2).sum() == 10
 
     # assert snps_csv
     assert (snps_csv == np.array(['rs1','rs2','rs3','rs4','rs5'])).all()

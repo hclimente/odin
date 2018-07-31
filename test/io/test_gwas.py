@@ -32,14 +32,14 @@ def test_read_file_table():
     x_csv, y_csv, snps_csv = csv._read_file(dataPath + 'gt.csv')
 
     # assert y_csv
-    assert torch.sum(y_csv == 1) == 4
-    assert torch.sum(y_csv == 0) == 4
+    assert (y_csv == 1).sum() == 4
+    assert (y_csv == 0).sum() == 4
 
     # assert x_csv
     assert x_csv.shape == (8, 5)
-    assert torch.sum(x_csv == 0) == 15
-    assert torch.sum(x_csv == 1) == 15
-    assert torch.sum(x_csv == 2) == 10
+    assert (x_csv == 0).sum() == 15
+    assert (x_csv == 1).sum() == 15
+    assert (x_csv == 2).sum() == 10
 
     # assert snps_csv
     assert (snps_csv == np.array(['rs1','rs2','rs3','rs4','rs5'])).all()
@@ -59,7 +59,7 @@ def test_read_file_ped():
 
     ped = GWAS(dataPath + 'gt.ped')
 
-    x,y,snps = ped._read_file(dataPath + 'gt.ped')
+    _,_,_ = ped._read_file(dataPath + 'gt.ped')
 
     x1,y1 = ped.__getitem__(1)
     assert (x1 == torch.tensor([[1.,1.,1.,0.]])).all()
